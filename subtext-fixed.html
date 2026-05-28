@@ -261,6 +261,17 @@ body::after {
 .fi-order { color: var(--amber-d); min-width: 24px; }
 .fi-name { flex: 1; color: var(--cream); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .fi-status { color: var(--cream-d); min-width: 80px; text-align: right; }
+.fi-error {
+  margin: -2px 0 10px 44px;
+  padding: 8px 12px;
+  border-left: 2px solid var(--caution);
+  background: rgba(220,100,80,.06);
+  color: var(--caution);
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
 .fi-remove {
   background: none; border: none; color: var(--cream-d);
   cursor: pointer; font-size: 14px; padding: 0 4px;
@@ -1190,19 +1201,30 @@ function fileToBase64(file) {
 async function prepareImageForOCR(file) {
   const dataUrl = await fileToDataURL(file);
   const img = await loadImage(dataUrl);
-  const maxSide = 1800;
-  const scale = Math.min(1, maxSide / Math.max(img.width, img.height));
-  const width = Math.max(1, Math.round(img.width * scale));
-  const height = Math.max(1, Math.round(img.height * scale));
-
-  const canvas = document.createElement('canvas');
-  canvas.width = width;
-  canvas.height = height;
-  const ctx = canvas.getContext('2d');
-  ctx.drawImage(img, 0, 0, width, height);
-
   const outputType = 'image/jpeg';
-  const compressed = canvas.toDataURL(outputType, 0.82);
+  let maxSide = 1400;
+  let quality = 0.78;
+  let compressed = '';
+
+  for (let attempt = 0; attempt < 6; attempt++) {
+    const scale = Math.min(1, maxSide / Math.max(img.width, img.height));
+    const width = Math.max(1, Math.round(img.width * scale));
+    const height = Math.max(1, Math.round(img.height * scale));
+
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0, width, height);
+
+    compressed = canvas.toDataURL(outputType, quality);
+    const approxBytes = Math.ceil((compressed.length - compressed.indexOf(',') - 1) * 0.75);
+    if (approxBytes < 3.8 * 1024 * 1024) break;
+
+    maxSide = Math.max(900, Math.round(maxSide * 0.82));
+    quality = Math.max(0.55, quality - 0.07);
+  }
+
   return {
     base64: compressed.split(',')[1],
     mediaType: outputType
@@ -1295,6 +1317,12 @@ function renderFileList() {
       });
       wrap.appendChild(item);
       wrap.appendChild(editor);
+    } else if (record.status === 'error' && record.errorMsg) {
+      const err = document.createElement('div');
+      err.className = 'fi-error';
+      err.textContent = record.errorMsg;
+      wrap.appendChild(item);
+      wrap.appendChild(err);
     } else {
       wrap.appendChild(item);
     }

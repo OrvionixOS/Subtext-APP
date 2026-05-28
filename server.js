@@ -351,12 +351,12 @@ async function handleOCR(req, res, payload) {
     return jsonResponse(res, 429, { error: 'Rate limit reached. Wait 30 seconds and try again.' });
   }
   if (response.status !== 200) {
-    console.error('[OCR] Anthropic error:', response.status, response.body.substring(0, 300));
     let upstream = '';
     try {
       const errData = JSON.parse(response.body);
       upstream = errData.error && errData.error.message ? ': ' + errData.error.message : '';
     } catch (_) {}
+    console.error('[OCR] Anthropic error:', response.status, upstream || response.body.substring(0, 300));
     return jsonResponse(res, 502, { error: 'OCR upstream error ' + response.status + upstream });
   }
 
