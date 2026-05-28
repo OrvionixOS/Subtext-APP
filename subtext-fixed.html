@@ -1051,7 +1051,7 @@ function handleFiles(e) {
   processOCRQueue();
 }
 
-// Serial OCR queue — ONE file at a time with 3s spacing
+// Serial OCR queue — ONE file at a time with spacing
 async function processOCRQueue() {
   if (ocrQueueRunning) return;  // guard re-entrancy
   ocrQueueRunning = true;
@@ -1082,9 +1082,9 @@ async function processOCRQueue() {
     rebuildTextarea();
     updateOCRStatusBar();
 
-    // 3-second spacing between OCR calls
+    // Spacing between OCR calls helps avoid hosted API rate limits.
     if (ocrQueue.some(id => fileRegistry.find(r => r.id === id && r.status === 'pending'))) {
-      await sleep(3000);
+      await sleep(6000);
     }
   }
 
@@ -1096,7 +1096,6 @@ async function processOCRQueue() {
 // All AI calls go to backend /api/analyze
 async function processFile(record) {
   try {
-    const base64 = await fileToBase64(record.file);
     const mediaType = record.file.type || 'image/jpeg';
     const isImage = mediaType.startsWith('image/');
     const isPdf = mediaType === 'application/pdf';
@@ -1106,27 +1105,39 @@ async function processFile(record) {
       return false;
     }
 
+    const prepared = isImage
+      ? await prepareImageForOCR(record.file)
+      : { base64: await fileToBase64(record.file), mediaType };
+
     // Build payload for backend
     const imagePayload = {
       type: isPdf ? 'document' : 'image',
-      mediaType: mediaType,
-      data: base64
+      mediaType: isPdf ? mediaType : prepared.mediaType,
+      data: prepared.base64
     };
 
     let response;
-    try {
-      response = await fetch(API_ENDPOINT, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          mode: 'ocr',
-          images: [imagePayload]
-        })
-      });
-    } catch (networkErr) {
-      record.errorMsg = 'Backend API required for live AI processing.';
-      showError('Backend API required for live AI processing. Start the /api/analyze server.');
-      return false;
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        response = await fetch(API_ENDPOINT, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            mode: 'ocr',
+            images: [imagePayload]
+          })
+        });
+      } catch (networkErr) {
+        record.errorMsg = 'Backend API required for live AI processing.';
+        showError('Backend API required for live AI processing. Start the /api/analyze server.');
+        return false;
+      }
+
+      if (response.status !== 429 || attempt === 3) break;
+
+      record.errorMsg = 'Rate limited. Retrying shortly...';
+      renderFileList();
+      await sleep(20000 * attempt);
     }
 
     if (!response.ok) {
@@ -1140,8 +1151,13 @@ async function processFile(record) {
         showError('Backend API required for live AI processing.');
         return false;
       }
-      record.errorMsg = 'Server error: ' + response.status;
-      showError('Server error ' + response.status + '. Check the backend console.');
+      let detail = '';
+      try {
+        const errData = await response.json();
+        detail = errData.error ? ': ' + errData.error : '';
+      } catch (_) {}
+      record.errorMsg = 'Server error ' + response.status + detail;
+      showError('Server error ' + response.status + detail);
       return false;
     }
 
@@ -1168,6 +1184,46 @@ function fileToBase64(file) {
     reader.onload = () => resolve(reader.result.split(',')[1]);
     reader.onerror = () => reject(new Error('File read failed'));
     reader.readAsDataURL(file);
+  });
+}
+
+async function prepareImageForOCR(file) {
+  const dataUrl = await fileToDataURL(file);
+  const img = await loadImage(dataUrl);
+  const maxSide = 1800;
+  const scale = Math.min(1, maxSide / Math.max(img.width, img.height));
+  const width = Math.max(1, Math.round(img.width * scale));
+  const height = Math.max(1, Math.round(img.height * scale));
+
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(img, 0, 0, width, height);
+
+  const outputType = 'image/jpeg';
+  const compressed = canvas.toDataURL(outputType, 0.82);
+  return {
+    base64: compressed.split(',')[1],
+    mediaType: outputType
+  };
+}
+
+function fileToDataURL(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = () => reject(new Error('File read failed'));
+    reader.readAsDataURL(file);
+  });
+}
+
+function loadImage(src) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error('Image load failed'));
+    img.src = src;
   });
 }
 

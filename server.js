@@ -200,8 +200,8 @@ function readBody(req) {
     let body = '';
     req.on('data', chunk => {
       body += chunk.toString();
-      if (body.length > 50 * 1024 * 1024) {
-        reject(new Error('Body too large (50 MB limit)'));
+      if (body.length > 80 * 1024 * 1024) {
+        reject(new Error('Body too large (80 MB limit). Try fewer or smaller screenshots.'));
       }
     });
     req.on('end', () => {
@@ -352,7 +352,12 @@ async function handleOCR(req, res, payload) {
   }
   if (response.status !== 200) {
     console.error('[OCR] Anthropic error:', response.status, response.body.substring(0, 300));
-    return jsonResponse(res, 502, { error: 'Upstream error: ' + response.status });
+    let upstream = '';
+    try {
+      const errData = JSON.parse(response.body);
+      upstream = errData.error && errData.error.message ? ': ' + errData.error.message : '';
+    } catch (_) {}
+    return jsonResponse(res, 502, { error: 'OCR upstream error ' + response.status + upstream });
   }
 
   let data;
