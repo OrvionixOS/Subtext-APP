@@ -1,0 +1,2258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SUBTEXT — See what's underneath.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&family=DM+Mono:wght@300;400;500&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #0d0c0a;
+  --deep: #141210;
+  --surface: #1c1a17;
+  --card: #232018;
+  --border: #2e2a24;
+  --border-l: #3d3830;
+  --amber: #c4a96b;
+  --amber-l: #d9bf89;
+  --amber-d: #7a6840;
+  --cream: #f0ebe0;
+  --cream-d: #9a9080;
+  --white: #f8f4ec;
+  --signal: #e8a87c;
+  --calm: #7eb89a;
+  --caution: #c4906b;
+  --gold-metal: linear-gradient(135deg,
+    #fff4c4 0%, #f5d97a 12%, #e6b94a 26%, #c89530 44%,
+    #8f6420 58%, #b8862c 72%, #e8c558 86%, #fae8a8 100%);
+  --gold-brushed: linear-gradient(180deg,
+    #f5d97a 0%, #e6b94a 30%, #a8761e 55%, #c89530 75%, #f0d068 100%);
+  --gold-antique: linear-gradient(135deg, #8a6418 0%, #b8862c 50%, #6f4f14 100%);
+  --gold-text: linear-gradient(135deg,
+    #fff4c4 0%, #f0c860 30%, #c89530 60%, #8f6420 90%, #e8c558 100%);
+  --gold-metal-hover: linear-gradient(135deg,
+    #fffae0 0%, #fce58a 12%, #f0c860 26%, #d4a338 44%,
+    #a8761e 58%, #c89530 72%, #f5d97a 86%, #fff4c4 100%);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body {
+  background: var(--ink); color: var(--cream);
+  font-family: 'Lora', Georgia, serif;
+  font-size: 17px; line-height: 1.7;
+  overflow-x: hidden; min-height: 100vh;
+}
+body::after {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none; z-index: 9999; opacity: .5;
+}
+
+/* SCREENS */
+.screen { display: none; min-height: 100vh; }
+.screen.active { display: block; }
+
+/* ── LANDING ──────────────────────────────────── */
+#landing {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  min-height: 100vh; padding: 60px 32px;
+  position: relative; text-align: center;
+}
+.land-bg {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 80% 60% at 50% 40%, rgba(196,169,107,.06) 0%, transparent 65%);
+  pointer-events: none;
+}
+.land-mark {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px; letter-spacing: .35em;
+  color: var(--amber-d); text-transform: uppercase;
+  margin-bottom: 36px; opacity: 0;
+  animation: fadeUp .7s .1s forwards;
+}
+.land-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(56px, 12vw, 120px);
+  font-weight: 400; color: var(--white);
+  line-height: .9; letter-spacing: -.01em;
+  margin-bottom: 12px; opacity: 0;
+  animation: fadeUp .7s .25s forwards;
+}
+.land-title em {
+  font-style: italic;
+  background: var(--gold-text);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 1px 2px rgba(196,169,107,0.15));
+}
+.land-sub {
+  font-size: clamp(16px, 2.2vw, 20px);
+  font-weight: 400; color: var(--cream-d);
+  margin-bottom: 8px; opacity: 0;
+  animation: fadeUp .7s .4s forwards; font-style: italic;
+}
+.land-tagline {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px; letter-spacing: .2em;
+  color: var(--amber-d); text-transform: uppercase;
+  margin-bottom: 56px; opacity: 0;
+  animation: fadeUp .7s .5s forwards;
+}
+.land-cta {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px; letter-spacing: .18em; text-transform: uppercase;
+  padding: 18px 52px;
+  background: var(--gold-metal); color: #1a0f02;
+  border: none; cursor: pointer; transition: all .25s;
+  opacity: 0; animation: fadeUp .7s .65s forwards;
+  font-weight: 700; position: relative;
+  text-shadow: 0 1px 0 rgba(255,244,196,0.4);
+  box-shadow:
+    inset 0 1px 0 rgba(255,250,224,0.7),
+    inset 0 -2px 0 rgba(111,79,20,0.5),
+    inset 1px 0 0 rgba(255,244,196,0.3),
+    inset -1px 0 0 rgba(143,100,32,0.4),
+    0 2px 4px rgba(0,0,0,0.4), 0 4px 16px rgba(0,0,0,0.25);
+}
+.land-cta:hover {
+  background: var(--gold-metal-hover); transform: translateY(-1px);
+  box-shadow:
+    inset 0 1px 0 rgba(255,250,224,0.9),
+    inset 0 -2px 0 rgba(111,79,20,0.5),
+    inset 1px 0 0 rgba(255,250,224,0.5),
+    inset -1px 0 0 rgba(143,100,32,0.4),
+    0 4px 8px rgba(0,0,0,0.5), 0 0 28px rgba(240,200,96,0.35);
+}
+.land-qualities {
+  display: flex; gap: 32px; flex-wrap: wrap;
+  justify-content: center; margin-top: 64px;
+  opacity: 0; animation: fadeUp .7s .8s forwards;
+}
+.lq {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px; letter-spacing: .2em;
+  color: var(--cream-d); text-transform: uppercase; opacity: .5;
+}
+.land-example {
+  max-width: 560px; margin: 60px auto 0;
+  background: var(--surface); border: 1px solid var(--border);
+  padding: 28px 32px; text-align: left;
+  opacity: 0; animation: fadeUp .7s .95s forwards;
+}
+.le-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 8px; letter-spacing: .2em;
+  color: var(--amber-d); text-transform: uppercase; margin-bottom: 12px;
+}
+.le-quote {
+  font-style: italic; color: var(--cream-d);
+  font-size: 14px; line-height: 1.65; margin-bottom: 16px;
+  border-left: 2px solid var(--amber-d); padding-left: 16px;
+}
+.le-insight { font-size: 14px; color: var(--cream); line-height: 1.65; }
+.le-insight strong { color: var(--amber); font-weight: 500; font-style: normal; }
+
+/* ── INPUT SCREEN ──────────────────────────── */
+#input-screen { padding: 0; }
+.input-nav {
+  height: 56px; display: flex; align-items: center; justify-content: space-between;
+  padding: 0 40px; border-bottom: 1px solid var(--border);
+  background: rgba(13,12,10,.9); backdrop-filter: blur(20px);
+  position: sticky; top: 0; z-index: 100;
+}
+.nav-logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px; font-style: italic;
+  background: var(--gold-text);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: -.01em; cursor: pointer;
+}
+.nav-back {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px; letter-spacing: .14em; color: var(--cream-d);
+  text-transform: uppercase; background: none; border: none;
+  cursor: pointer; transition: color .2s;
+}
+.nav-back:hover { color: var(--cream); }
+.input-body { max-width: 760px; margin: 0 auto; padding: 56px 40px 80px; }
+.input-head { margin-bottom: 40px; }
+.input-head h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(28px, 4vw, 44px);
+  font-weight: 400; color: var(--white); line-height: 1.15; margin-bottom: 10px;
+}
+.input-head p { font-size: 15px; font-style: italic; color: var(--cream-d); line-height: 1.6; }
+
+.context-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 28px; }
+.ctx-btn {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px; letter-spacing: .12em; text-transform: uppercase;
+  padding: 8px 16px; background: none; border: 1px solid var(--border);
+  color: var(--cream-d); cursor: pointer; transition: all .2s;
+}
+.ctx-btn:hover { border-color: var(--amber-d); color: var(--cream); }
+.ctx-btn.active { background: rgba(196,169,107,.1); border-color: var(--amber); color: var(--amber); }
+
+.paste-area {
+  width: 100%; min-height: 280px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-bottom: 2px solid var(--border-l);
+  color: var(--cream); font-family: 'Lora', serif;
+  font-size: 15px; line-height: 1.75; padding: 24px 28px;
+  resize: vertical; outline: none; transition: border-color .25s; font-style: italic;
+}
+.paste-area:focus { border-color: var(--amber-d); background: var(--deep); }
+.paste-area::placeholder { color: var(--cream-d); opacity: .4; font-style: italic; }
+
+.upload-strip {
+  display: flex; align-items: center; gap: 16px;
+  margin-top: 8px; padding: 12px 0; border-bottom: 1px solid var(--border);
+}
+.upload-btn {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px; letter-spacing: .14em; text-transform: uppercase;
+  padding: 8px 18px; background: none; border: 1px solid var(--border);
+  color: var(--cream-d); cursor: pointer; transition: all .2s;
+}
+.upload-btn:hover { border-color: var(--amber-d); color: var(--cream); }
+.upload-btn:disabled { opacity: .4; cursor: not-allowed; pointer-events: none; }
+.upload-note {
+  font-family: 'DM Mono', monospace;
+  font-size: 8px; letter-spacing: .1em;
+  color: var(--cream-d); text-transform: uppercase; opacity: .5;
+}
+#file-input { display: none; }
+
+/* OCR status indicator */
+.ocr-status-bar {
+  display: none; align-items: center; gap: 10px;
+  padding: 8px 14px; margin-top: 6px;
+  background: rgba(196,169,107,.06); border: 1px solid var(--amber-d);
+  font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: .1em;
+  color: var(--amber); text-transform: uppercase;
+}
+.ocr-status-bar.show { display: flex; }
+.ocr-pulse {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--amber); animation: pulse .8s infinite; flex-shrink: 0;
+}
+
+.file-list { display: flex; flex-direction: column; gap: 6px; margin-top: 12px; }
+.file-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 14px; background: var(--surface);
+  border: 1px solid var(--border); font-family: 'DM Mono', monospace;
+  font-size: 10px; letter-spacing: .04em; animation: fadeUp .3s ease;
+}
+.file-item.processing { border-color: var(--amber-d); }
+.file-item.done { border-color: var(--border); }
+.file-item.error { border-color: var(--caution); }
+.file-item.pending { border-color: var(--border); opacity: .6; }
+.fi-icon { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; background: var(--border-l); }
+.file-item.processing .fi-icon { background: var(--amber); animation: pulse .8s infinite; }
+.file-item.done .fi-icon { background: var(--calm); }
+.file-item.error .fi-icon { background: var(--caution); }
+.file-item.pending .fi-icon { background: var(--border-l); }
+.fi-order { color: var(--amber-d); min-width: 24px; }
+.fi-name { flex: 1; color: var(--cream); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fi-status { color: var(--cream-d); min-width: 80px; text-align: right; }
+.fi-remove {
+  background: none; border: none; color: var(--cream-d);
+  cursor: pointer; font-size: 14px; padding: 0 4px;
+  transition: color .2s; flex-shrink: 0;
+}
+.fi-remove:hover { color: var(--caution); }
+.fi-retry {
+  font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: .1em;
+  text-transform: uppercase; padding: 4px 10px;
+  background: none; border: 1px solid var(--caution);
+  color: var(--caution); cursor: pointer; transition: all .2s; flex-shrink: 0;
+}
+.fi-retry:hover { background: var(--caution); color: var(--ink); }
+
+/* OCR extracted text editor */
+.fi-text-toggle {
+  font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: .08em;
+  text-transform: uppercase; padding: 4px 10px;
+  background: none; border: 1px solid var(--border);
+  color: var(--amber-d); cursor: pointer; transition: all .2s; flex-shrink: 0;
+}
+.fi-text-toggle:hover { border-color: var(--amber); color: var(--amber); }
+.fi-text-editor {
+  width: 100%; margin-top: 8px; padding: 12px;
+  background: var(--deep); border: 1px solid var(--border);
+  color: var(--cream); font-family: 'DM Mono', monospace;
+  font-size: 11px; line-height: 1.7; resize: vertical; outline: none;
+  min-height: 80px; display: none;
+}
+.fi-text-editor:focus { border-color: var(--amber-d); }
+.fi-text-editor.visible { display: block; }
+.file-item-wrap { display: flex; flex-direction: column; margin-bottom: 6px; }
+.file-item-wrap .file-item { margin-bottom: 0; }
+
+.batch-controls {
+  display: none; align-items: center; gap: 16px;
+  padding: 10px 0; margin-top: 4px;
+}
+.batch-info { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--cream-d); letter-spacing: .06em; }
+.batch-action {
+  font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: .1em;
+  text-transform: uppercase; padding: 6px 14px;
+  background: none; border: 1px solid var(--border);
+  color: var(--cream-d); cursor: pointer; transition: all .2s;
+}
+.batch-action:hover { border-color: var(--amber-d); color: var(--cream); }
+.batch-action.warn { border-color: var(--caution); color: var(--caution); }
+.batch-action.warn:hover { background: var(--caution); color: var(--ink); }
+
+.optional-context { margin-top: 28px; }
+.oc-label {
+  font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: .14em;
+  color: var(--amber-d); text-transform: uppercase; margin-bottom: 10px;
+}
+.oc-input {
+  width: 100%; background: var(--surface);
+  border: 1px solid var(--border); border-bottom: 2px solid var(--border-l);
+  color: var(--cream); font-family: 'Lora', serif; font-style: italic;
+  font-size: 14px; padding: 14px 18px; outline: none; transition: border-color .2s;
+}
+.oc-input:focus { border-color: var(--amber-d); }
+.oc-input::placeholder { color: var(--cream-d); opacity: .5; }
+
+.analyze-btn {
+  width: 100%; margin-top: 32px; padding: 22px 0;
+  background: var(--gold-metal); color: #1a0f02;
+  font-family: 'DM Mono', monospace; font-size: 11px;
+  letter-spacing: .25em; text-transform: uppercase; font-weight: 700;
+  border: none; cursor: pointer; transition: all .25s;
+  box-shadow:
+    inset 0 1px 0 rgba(255,250,224,0.7), inset 0 -2px 0 rgba(111,79,20,0.5),
+    0 2px 4px rgba(0,0,0,0.3);
+}
+.analyze-btn:hover:not(:disabled) {
+  background: var(--gold-metal-hover); transform: translateY(-1px);
+  box-shadow: inset 0 1px 0 rgba(255,250,224,0.9), 0 4px 8px rgba(0,0,0,0.4), 0 0 24px rgba(240,200,96,0.25);
+}
+.analyze-btn:disabled { opacity: .35; cursor: not-allowed; transform: none; }
+
+.safety-note {
+  margin-top: 20px; font-family: 'DM Mono', monospace;
+  font-size: 9px; letter-spacing: .06em; color: var(--cream-d);
+  opacity: .5; line-height: 1.8; text-align: center;
+}
+
+/* Error banner */
+.error-banner {
+  display: none; padding: 14px 18px; margin-top: 12px;
+  background: rgba(196,144,107,.08); border: 1px solid var(--caution);
+  font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: .06em;
+  color: var(--caution); line-height: 1.6;
+}
+.error-banner.show { display: block; }
+
+/* ── ANALYSIS SCREEN ────────────────────────── */
+#analysis-screen {
+  display: none; flex-direction: column;
+  align-items: center; justify-content: center;
+  min-height: 100vh; padding: 80px 40px;
+}
+#analysis-screen.active { display: flex; }
+.analysis-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(24px, 3vw, 36px); font-weight: 400;
+  color: var(--white); margin-bottom: 8px; text-align: center;
+}
+.analysis-sub {
+  font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: .2em;
+  color: var(--amber-d); text-transform: uppercase; margin-bottom: 56px;
+}
+.agents-list { width: 100%; max-width: 440px; display: flex; flex-direction: column; gap: 2px; }
+.agent-row {
+  display: flex; align-items: center; gap: 16px; padding: 14px 20px;
+  background: var(--surface); border: 1px solid var(--border);
+  transition: all .3s;
+}
+.agent-row.active { border-color: var(--amber-d); background: rgba(196,169,107,.04); }
+.agent-row.done { border-color: var(--border); opacity: .6; }
+.agent-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--border-l); transition: all .3s; flex-shrink: 0;
+}
+.agent-row.active .agent-dot { background: var(--amber); animation: pulse .8s infinite; }
+.agent-row.done .agent-dot { background: var(--calm); }
+.agent-name {
+  flex: 1; font-family: 'DM Mono', monospace;
+  font-size: 10px; letter-spacing: .08em; color: var(--cream);
+}
+.agent-status {
+  font-family: 'DM Mono', monospace; font-size: 9px;
+  letter-spacing: .06em; color: var(--cream-d);
+}
+.agent-row.active .agent-status { color: var(--amber); }
+.agent-row.done .agent-status { color: var(--calm); }
+
+/* Phase label in analysis screen */
+.analysis-phase-label {
+  font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: .16em;
+  color: var(--amber-d); text-transform: uppercase; margin-bottom: 20px; text-align: center;
+}
+
+/* ── RESULTS SCREEN ─────────────────────────── */
+#results-screen { padding: 0; }
+.results-nav {
+  height: 56px; display: flex; align-items: center; justify-content: space-between;
+  padding: 0 40px; border-bottom: 1px solid var(--border);
+  background: rgba(13,12,10,.9); backdrop-filter: blur(20px);
+  position: sticky; top: 0; z-index: 100;
+}
+.results-new {
+  font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: .14em;
+  text-transform: uppercase; padding: 8px 20px;
+  background: none; border: 1px solid var(--border);
+  color: var(--cream-d); cursor: pointer; transition: all .2s;
+}
+.results-new:hover { border-color: var(--amber-d); color: var(--cream); }
+.results-body { max-width: 820px; margin: 0 auto; padding: 56px 40px 100px; }
+.results-meta {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 48px; padding-bottom: 24px; border-bottom: 1px solid var(--border);
+}
+.results-type {
+  font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: .2em;
+  color: var(--amber-d); text-transform: uppercase;
+}
+.results-date { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--cream-d); letter-spacing: .06em; }
+
+/* Report sections */
+.report-section { margin-bottom: 64px; }
+.section-number {
+  font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: .2em;
+  color: var(--amber-d); text-transform: uppercase; margin-bottom: 16px;
+}
+.sec-header { display: flex; align-items: baseline; justify-content: space-between; gap: 24px; margin-bottom: 24px; }
+.sec-title {
+  font-family: 'Playfair Display', serif; font-size: clamp(22px, 3vw, 32px);
+  font-weight: 400; color: var(--white); line-height: 1.2;
+}
+.sec-body { color: var(--cream-d); line-height: 1.75; }
+.sec-body p { margin-bottom: 16px; }
+.sec-body p:last-child { margin-bottom: 0; }
+
+/* Risk pill */
+.risk-pill {
+  font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: .14em;
+  text-transform: uppercase; padding: 5px 12px; white-space: nowrap; flex-shrink: 0;
+}
+.risk-pill.low { background: rgba(126,184,154,.1); border: 1px solid var(--calm); color: var(--calm); }
+.risk-pill.moderate { background: rgba(228,168,124,.08); border: 1px solid var(--signal); color: var(--signal); }
+.risk-pill.high { background: rgba(196,144,107,.08); border: 1px solid var(--caution); color: var(--caution); }
+.risk-pill.extreme { background: rgba(220,100,80,.08); border: 1px solid #dc6450; color: #dc6450; }
+
+/* Tables */
+.data-table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 14px; }
+.data-table th {
+  font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--amber-d);
+  padding: 10px 14px; border-bottom: 1px solid var(--border); text-align: left;
+}
+.data-table td { padding: 14px; border-bottom: 1px solid var(--border); color: var(--cream-d); vertical-align: top; }
+.data-table tr:last-child td { border-bottom: none; }
+
+/* Intensity badges */
+.intensity-badge {
+  font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: .1em;
+  text-transform: uppercase; padding: 3px 9px; white-space: nowrap;
+}
+.intensity-badge.low { background: rgba(126,184,154,.1); color: var(--calm); }
+.intensity-badge.medium { background: rgba(228,168,124,.1); color: var(--signal); }
+.intensity-badge.high { background: rgba(196,144,107,.1); color: var(--caution); }
+.intensity-badge.max { background: rgba(220,100,80,.1); color: #dc6450; }
+
+/* Unspoken list */
+.unspoken-list { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
+.unspoken-item {
+  padding: 18px 22px; background: var(--surface); border-left: 3px solid var(--amber-d);
+  font-style: italic; color: var(--cream); line-height: 1.6; font-size: 15px;
+}
+
+/* Translation card */
+.translation-card { margin-top: 20px; }
+.translation-layer {
+  padding: 20px 24px; border: 1px solid var(--border); margin-bottom: -1px;
+  background: var(--surface);
+}
+.translation-layer.surface { background: var(--card); }
+.translation-layer.deepest { border-color: var(--amber-d); }
+.tl-label {
+  font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--amber-d); margin-bottom: 10px;
+}
+.tl-body { color: var(--cream); font-size: 15px; line-height: 1.65; }
+
+/* Signal callouts */
+.signal-callout {
+  padding: 16px 20px; border-left: 2px solid var(--amber-d);
+  background: var(--surface); margin-bottom: 12px;
+}
+.signal-callout.neutral { border-color: var(--cream-d); }
+.signal-label {
+  font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--amber-d); margin-bottom: 6px;
+}
+.signal-callout.neutral .signal-label { color: var(--cream-d); }
+
+/* Ranked list */
+.ranked-list { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
+.ranked-item { display: flex; gap: 20px; align-items: flex-start; padding: 18px; background: var(--surface); border: 1px solid var(--border); }
+.ranked-num {
+  font-family: 'DM Mono', monospace; font-size: 18px; color: var(--amber-d);
+  font-weight: 500; letter-spacing: -.02em; line-height: 1; flex-shrink: 0;
+}
+.ranked-want { font-size: 15px; color: var(--white); margin-bottom: 6px; font-weight: 500; }
+.ranked-reason { font-size: 13px; color: var(--cream-d); line-height: 1.6; }
+
+/* Script cards */
+.script-card {
+  background: var(--surface); border: 1px solid var(--border);
+  padding: 22px 26px; margin-bottom: 12px;
+}
+.script-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+.script-scenario {
+  font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--amber);
+}
+.script-copy-btn {
+  font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: .1em;
+  text-transform: uppercase; padding: 5px 12px;
+  background: none; border: 1px solid var(--border);
+  color: var(--cream-d); cursor: pointer; transition: all .2s;
+}
+.script-copy-btn:hover { border-color: var(--amber-d); color: var(--amber); }
+.script-body {
+  font-style: italic; color: var(--cream); font-size: 15px; line-height: 1.7;
+  padding: 14px 18px; background: var(--deep); border-left: 2px solid var(--amber-d);
+  margin-bottom: 12px;
+}
+.script-effect { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--cream-d); letter-spacing: .04em; }
+
+/* Phrase grid */
+.phrase-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 20px; }
+@media (max-width: 640px) { .phrase-grid { grid-template-columns: 1fr; } }
+.phrase-col-header {
+  font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: .14em;
+  text-transform: uppercase; padding-bottom: 12px; margin-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.phrase-col.work .phrase-col-header { color: var(--calm); }
+.phrase-col.avoid .phrase-col-header { color: var(--caution); }
+.phrase-item {
+  padding: 12px 16px; font-size: 14px; color: var(--cream);
+  font-style: italic; margin-bottom: 8px; background: var(--surface); line-height: 1.6;
+}
+.phrase-item.work { border-left: 2px solid var(--calm); }
+.phrase-item.avoid { border-left: 2px solid var(--caution); }
+.phrase-why {
+  display: block; font-family: 'DM Mono', monospace; font-size: 9px;
+  color: var(--cream-d); font-style: normal; margin-top: 4px; letter-spacing: .02em;
+}
+
+/* Scorecard */
+.scorecard { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; margin-top: 20px; }
+.score-card {
+  background: var(--surface); border: 1px solid var(--border);
+  padding: 20px; position: relative; overflow: hidden;
+}
+.score-dim {
+  font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--cream-d); margin-bottom: 12px;
+}
+.score-value { font-size: 32px; font-family: 'Playfair Display', serif; color: var(--white); line-height: 1; }
+.score-out { font-size: 14px; color: var(--cream-d); }
+.score-verdict {
+  font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--amber); margin-top: 6px; margin-bottom: 16px;
+}
+.score-bar {
+  height: 2px; background: var(--gold-brushed);
+  position: absolute; bottom: 0; left: 0; transition: width .8s;
+}
+
+/* Outcomes */
+.outcomes-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 20px; }
+@media (max-width: 640px) { .outcomes-grid { grid-template-columns: 1fr; } }
+.outcomes-header {
+  font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: .12em;
+  text-transform: uppercase; padding-bottom: 12px; margin-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.outcomes-col.comply .outcomes-header { color: var(--caution); }
+.outcomes-col.firm .outcomes-header { color: var(--calm); }
+.outcome-row { display: flex; gap: 12px; margin-bottom: 12px; font-size: 14px; color: var(--cream-d); line-height: 1.6; }
+.outcome-mark { color: var(--amber-d); flex-shrink: 0; font-family: 'DM Mono', monospace; }
+
+/* Bottom line */
+.bottom-line {
+  margin: 48px 0; padding: 32px; background: var(--surface);
+  border: 1px solid var(--amber-d);
+}
+.bottom-line-label {
+  font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: .2em;
+  text-transform: uppercase; color: var(--amber-d); margin-bottom: 14px;
+}
+.bottom-line-text { font-size: 18px; color: var(--white); line-height: 1.65; font-style: italic; }
+
+
+/* Full Markdown decode report */
+.markdown-report {
+  color: var(--cream-d);
+  line-height: 1.72;
+}
+.markdown-report h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(28px, 4vw, 44px);
+  font-weight: 400;
+  color: var(--white);
+  line-height: 1.08;
+  margin: 0 0 22px;
+}
+.markdown-report h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 25px;
+  font-weight: 400;
+  color: var(--white);
+  margin: 34px 0 14px;
+}
+.markdown-report h4 {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--amber);
+  margin: 28px 0 12px;
+}
+.markdown-report p { margin: 0 0 16px; }
+.markdown-report blockquote {
+  margin: 18px 0;
+  padding: 16px 20px;
+  background: var(--deep);
+  border-left: 2px solid var(--amber-d);
+  color: var(--cream);
+  font-style: italic;
+}
+.markdown-report ul,
+.markdown-report ol {
+  margin: 12px 0 20px 24px;
+  padding: 0;
+}
+.markdown-report li { margin: 8px 0; }
+.markdown-report table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0 28px;
+  font-size: 14px;
+}
+.markdown-report th {
+  text-align: left;
+  padding: 11px 12px;
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--amber);
+  border-bottom: 1px solid var(--amber-d);
+}
+.markdown-report td {
+  padding: 13px 12px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+.markdown-report hr {
+  border: 0;
+  border-top: 1px solid var(--border);
+  margin: 32px 0;
+}
+.markdown-report strong { color: var(--cream); }
+.markdown-report code {
+  font-family: 'DM Mono', monospace;
+  font-size: .9em;
+  color: var(--amber);
+  background: var(--deep);
+  padding: 1px 4px;
+}
+
+/* Refinement section */
+.refine-section {
+  margin: 48px 0; padding: 36px; background: var(--surface);
+  border: 1px solid var(--border);
+}
+.refine-header { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
+.refine-icon {
+  width: 32px; height: 32px; background: var(--gold-antique);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; color: var(--amber-l); flex-shrink: 0;
+}
+.refine-title {
+  font-family: 'Playfair Display', serif; font-size: 22px;
+  font-weight: 400; color: var(--white);
+}
+.refine-sub { color: var(--cream-d); font-size: 14px; line-height: 1.65; margin-bottom: 20px; }
+.refine-input {
+  width: 100%; background: var(--deep); border: 1px solid var(--border);
+  color: var(--cream); font-family: 'Lora', serif; font-style: italic;
+  font-size: 14px; padding: 16px 18px; outline: none;
+  transition: border-color .2s; resize: vertical; min-height: 80px;
+}
+.refine-input:focus { border-color: var(--amber-d); }
+.refine-input::placeholder { color: var(--cream-d); opacity: .4; }
+.refine-suggestions { display: flex; gap: 8px; flex-wrap: wrap; margin: 14px 0; }
+.refine-chip {
+  font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: .08em;
+  text-transform: uppercase; padding: 6px 14px;
+  background: none; border: 1px solid var(--border);
+  color: var(--cream-d); cursor: pointer; transition: all .2s;
+}
+.refine-chip:hover { border-color: var(--amber-d); color: var(--amber); }
+.refine-actions { display: flex; align-items: center; gap: 16px; margin-top: 16px; flex-wrap: wrap; }
+.refine-btn {
+  font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: .14em;
+  text-transform: uppercase; padding: 12px 28px;
+  background: var(--gold-antique); color: var(--amber-l);
+  border: none; cursor: pointer; transition: all .2s;
+}
+.refine-btn:hover:not(:disabled) { opacity: .85; }
+.refine-btn:disabled { opacity: .4; cursor: not-allowed; }
+.refine-note { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--cream-d); letter-spacing: .04em; }
+.refine-status {
+  font-family: 'DM Mono', monospace; font-size: 9px; color: var(--amber);
+  letter-spacing: .1em; display: none; align-items: center; gap: 8px;
+}
+.refine-status.show { display: flex; }
+.refine-status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--amber); animation: pulse .8s infinite; }
+
+/* Agent cards appendix */
+.agents-toggle {
+  display: flex; align-items: center; gap: 10px;
+  background: none; border: 1px solid var(--border);
+  color: var(--cream-d); font-family: 'DM Mono', monospace;
+  font-size: 9px; letter-spacing: .1em; text-transform: uppercase;
+  padding: 12px 20px; cursor: pointer; transition: all .2s; margin-bottom: 2px;
+}
+.agents-toggle:hover { border-color: var(--amber-d); color: var(--cream); }
+.agents-toggle-icon { font-size: 14px; transition: transform .3s; }
+.agents-toggle.open .agents-toggle-icon { transform: rotate(90deg); }
+.agents-detail { display: none; }
+.agents-detail.open { display: block; }
+.agent-card {
+  background: var(--surface); border: 1px solid var(--border);
+  padding: 20px; margin-bottom: 8px;
+}
+.ac-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.ac-name { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--amber); }
+.ac-body { font-size: 14px; color: var(--cream-d); line-height: 1.65; }
+.confidence-pill {
+  font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: .12em;
+  text-transform: uppercase; padding: 3px 9px;
+}
+.confidence-pill.high { background: rgba(126,184,154,.1); color: var(--calm); }
+.confidence-pill.medium { background: rgba(228,168,124,.1); color: var(--signal); }
+.confidence-pill.low { background: rgba(155,144,128,.1); color: var(--cream-d); }
+
+/* Share section */
+.share-section { text-align: center; margin: 40px 0; }
+.share-btn {
+  font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: .14em;
+  text-transform: uppercase; padding: 12px 28px;
+  background: none; border: 1px solid var(--border);
+  color: var(--cream-d); cursor: pointer; transition: all .2s;
+}
+.share-btn:hover { border-color: var(--amber-d); color: var(--amber); }
+.share-note { font-family: 'DM Mono', monospace; font-size: 8px; color: var(--cream-d); opacity: .5; margin-top: 8px; letter-spacing: .06em; }
+
+/* Share card overlay */
+#share-card-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(13,12,10,.9); backdrop-filter: blur(12px);
+  z-index: 1000; align-items: center; justify-content: center;
+}
+#share-card-overlay.open { display: flex; }
+.share-card {
+  background: var(--surface); border: 1px solid var(--amber-d);
+  padding: 40px; max-width: 480px; width: 90%; text-align: center;
+}
+.sc-brand {
+  font-family: 'Playfair Display', serif; font-size: 16px; font-style: italic;
+  background: var(--gold-text); -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent; margin-bottom: 20px; letter-spacing: -.01em;
+}
+.sc-quote {
+  font-size: 17px; font-style: italic; color: var(--cream);
+  line-height: 1.65; margin-bottom: 16px; padding: 0 8px;
+}
+.sc-note { font-family: 'DM Mono', monospace; font-size: 8px; color: var(--cream-d); opacity: .5; letter-spacing: .1em; margin-bottom: 24px; }
+.sc-actions { display: flex; gap: 12px; justify-content: center; }
+.sc-copy {
+  font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: .12em;
+  text-transform: uppercase; padding: 10px 22px;
+  background: var(--gold-antique); color: var(--amber-l); border: none; cursor: pointer; transition: all .2s;
+}
+.sc-close {
+  font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: .12em;
+  text-transform: uppercase; padding: 10px 22px;
+  background: none; border: 1px solid var(--border); color: var(--cream-d); cursor: pointer; transition: all .2s;
+}
+.sc-close:hover { border-color: var(--amber-d); color: var(--cream); }
+
+/* Animations */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .3; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════ LANDING ══════════════════ -->
+<div id="landing" class="screen active">
+  <div class="land-bg"></div>
+  <div class="land-mark">Communication Intelligence</div>
+  <h1 class="land-title">Sub<em>text</em></h1>
+  <p class="land-sub">Paste any conversation. See what's underneath.</p>
+  <div class="land-tagline">Multiple analytical lenses · No diagnoses · No judgment</div>
+  <button class="land-cta" onclick="showInput()">Analyze a conversation &rarr;</button>
+  <div class="land-qualities">
+    <span class="lq">Emotionally nuanced</span>
+    <span class="lq">Psychologically precise</span>
+    <span class="lq">Always uncertain where warranted</span>
+    <span class="lq">Private &amp; secure</span>
+  </div>
+</div>
+
+<!-- ══════════════════ INPUT ══════════════════ -->
+<div id="input-screen" class="screen">
+  <nav class="input-nav">
+    <div class="nav-logo" onclick="showLanding()">Subtext</div>
+    <button class="nav-back" onclick="showLanding()">&larr; Back</button>
+  </nav>
+  <div class="input-body">
+    <div class="input-head">
+      <h2>What would you like to understand?</h2>
+      <p>Paste a conversation, text exchange, email, or any communication. The more context you have, the more useful the analysis.</p>
+    </div>
+    <div class="context-row" id="context-row">
+      <button class="ctx-btn active" onclick="setCtx(this,'relationship')">Relationship</button>
+      <button class="ctx-btn" onclick="setCtx(this,'workplace')">Workplace</button>
+      <button class="ctx-btn" onclick="setCtx(this,'family')">Family</button>
+      <button class="ctx-btn" onclick="setCtx(this,'negotiation')">Negotiation</button>
+      <button class="ctx-btn" onclick="setCtx(this,'legal')">Legal / Financial</button>
+      <button class="ctx-btn" onclick="setCtx(this,'other')">Other</button>
+    </div>
+    <textarea class="paste-area" id="conversation-input"
+      placeholder="Paste your conversation here...&#10;&#10;This can be a text thread, email exchange, WhatsApp conversation, chat log, or any back-and-forth communication.&#10;&#10;The longer the conversation, the higher the confidence of the analysis."
+      oninput="checkInput()"></textarea>
+    <div class="upload-strip">
+      <button class="upload-btn" id="upload-btn" onclick="document.getElementById('file-input').click()">
+        + Add screenshots
+      </button>
+      <input type="file" id="file-input" accept="image/*,application/pdf" multiple onchange="handleFiles(event)">
+      <span class="upload-note">Multiple files OK · Processed in order · JPG, PNG, WEBP, PDF</span>
+    </div>
+    <!-- OCR queue status indicator -->
+    <div class="ocr-status-bar" id="ocr-status-bar">
+      <div class="ocr-pulse"></div>
+      <span id="ocr-status-text">Reading screenshot 1 of 1…</span>
+    </div>
+    <div class="file-list" id="file-list"></div>
+    <div class="batch-controls" id="batch-controls" style="display:none">
+      <span class="batch-info" id="batch-info">0 files</span>
+      <button class="batch-action warn" id="retry-failed-btn" onclick="retryAllFailed()" style="display:none">Retry failed</button>
+      <button class="batch-action" id="clear-all-btn" onclick="clearAllFiles()">Clear all</button>
+    </div>
+    <!-- Global error banner -->
+    <div class="error-banner" id="error-banner"></div>
+    <div class="optional-context">
+      <div class="oc-label">Optional context (improves analysis)</div>
+      <input class="oc-input" id="optional-context" placeholder="e.g., 'This is my manager of 3 years. Things have felt tense since I asked for a raise.'">
+    </div>
+    <button class="analyze-btn" id="analyze-btn" onclick="startAnalysis()" disabled>
+      Begin analysis &rarr;
+    </button>
+    <div class="safety-note">
+      Subtext does not diagnose, label, or make definitive claims about people.<br>
+      All interpretations include confidence levels and alternative explanations.<br>
+      Your conversation is not stored or used for training.
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ ANALYSIS ══════════════════ -->
+<div id="analysis-screen" class="screen">
+  <div class="analysis-title">Reading the conversation.</div>
+  <div class="analysis-phase-label" id="analysis-phase-label">Phase 1 of 2 · Analytical lenses</div>
+  <div class="analysis-sub">Sequential analysis · Server-side processing</div>
+  <div class="agents-list" id="agents-list">
+    <div class="agent-row" data-agent="tone"><div class="agent-dot"></div><div class="agent-name">Tone Analyst</div><div class="agent-status">Waiting</div></div>
+    <div class="agent-row" data-agent="subtext"><div class="agent-dot"></div><div class="agent-name">Emotional Subtext</div><div class="agent-status">Waiting</div></div>
+    <div class="agent-row" data-agent="manipulation"><div class="agent-dot"></div><div class="agent-name">Signal Detection</div><div class="agent-status">Waiting</div></div>
+    <div class="agent-row" data-agent="style"><div class="agent-dot"></div><div class="agent-name">Communication Style</div><div class="agent-status">Waiting</div></div>
+    <div class="agent-row" data-agent="conflict"><div class="agent-dot"></div><div class="agent-name">Conflict Dynamics</div><div class="agent-status">Waiting</div></div>
+    <div class="agent-row" data-agent="attachment"><div class="agent-dot"></div><div class="agent-name">Relational Patterns</div><div class="agent-status">Waiting</div></div>
+    <div class="agent-row" data-agent="power"><div class="agent-dot"></div><div class="agent-name">Power Dynamics</div><div class="agent-status">Waiting</div></div>
+    <div class="agent-row" data-agent="pattern"><div class="agent-dot"></div><div class="agent-name">Pattern Recognition</div><div class="agent-status">Waiting</div></div>
+    <div class="agent-row" data-agent="synthesizer"><div class="agent-dot"></div><div class="agent-name">Synthesizer</div><div class="agent-status">Waiting</div></div>
+  </div>
+</div>
+
+<!-- ══════════════════ RESULTS ══════════════════ -->
+<div id="results-screen" class="screen">
+  <nav class="results-nav">
+    <div class="nav-logo">Subtext</div>
+    <button class="results-new" onclick="showInput()">New analysis</button>
+  </nav>
+  <div class="results-body" id="results-body">
+    <!-- Populated by JS -->
+  </div>
+</div>
+
+<!-- ══════════════════ SHARE OVERLAY ══════════════════ -->
+<div id="share-card-overlay" onclick="closeShareCard(event)">
+  <div class="share-card" id="share-card-content">
+    <div class="sc-brand">Subtext</div>
+    <div class="sc-quote" id="sc-quote-txt"></div>
+    <div class="sc-note">Pattern detected · Personal details removed · Subtext analysis</div>
+    <div class="sc-actions">
+      <button class="sc-copy" onclick="copyShareText()">Copy to clipboard</button>
+      <button class="sc-close" onclick="document.getElementById('share-card-overlay').classList.remove('open')">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// CONFIGURATION
+// ═══════════════════════════════════════════════════════
+const API_ENDPOINT = '/api/analyze'; // All AI calls go through your backend
+
+// ═══════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════
+let currentContext = 'relationship';
+let analysisResults = null;
+
+// ── OCR LOCK — serial queue, one file at a time ──
+let ocrLock = false;           // true while a file is being OCR'd
+let ocrQueue = [];             // ordered list of pending record IDs
+let ocrQueueRunning = false;   // guard: processOCRQueue() re-entrancy
+
+// ── ANALYSIS LOCK — prevents double-click / duplicate runs ──
+let analysisLock = false;
+
+// ── FILE REGISTRY ──
+let fileRegistry = [];
+let fileOrderCounter = 0;
+
+// ── SCRIPT STORE — populated in renderResults, read by copyScript ──
+// AI-generated content is NEVER injected into onclick strings.
+// Scripts are stored in this map and referenced by numeric index only.
+let scriptStore = {};
+
+// ── SHARE INSIGHT — populated in renderResults, read by openShareCard ──
+let shareInsight = '';
+
+// ═══════════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════════
+function showLanding() {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('landing').classList.add('active');
+}
+function showInput() {
+  // Re-enable buttons on return
+  analysisLock = false;
+  document.getElementById('analyze-btn').disabled =
+    document.getElementById('conversation-input').value.trim().length < 20;
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('input-screen').classList.add('active');
+  document.getElementById('conversation-input').focus();
+}
+function showResults() {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('results-screen').classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+// ═══════════════════════════════════════════════════════
+// INPUT
+// ═══════════════════════════════════════════════════════
+function setCtx(el, ctx) {
+  document.querySelectorAll('.ctx-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  currentContext = ctx;
+}
+function checkInput() {
+  const val = document.getElementById('conversation-input').value.trim();
+  const btn = document.getElementById('analyze-btn');
+  // Only enable if not analysis-locked and there's enough text
+  if (!analysisLock) {
+    btn.disabled = val.length < 20;
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// ERROR DISPLAY
+// ═══════════════════════════════════════════════════════
+function showError(msg) {
+  const banner = document.getElementById('error-banner');
+  banner.textContent = msg;
+  banner.classList.add('show');
+  // Auto-hide after 12s
+  setTimeout(() => banner.classList.remove('show'), 12000);
+}
+function clearError() {
+  document.getElementById('error-banner').classList.remove('show');
+}
+
+// ═══════════════════════════════════════════════════════
+// FILE UPLOAD SYSTEM — Serial OCR Queue
+// ═══════════════════════════════════════════════════════
+// Each record: { id, file, name, order, status, extracted, errorMsg }
+// status: pending | processing | done | error
+
+function handleFiles(e) {
+  const files = Array.from(e.target.files);
+  if (!files.length) return;
+
+  files.forEach(file => {
+    fileOrderCounter++;
+    const record = {
+      id: 'file-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5),
+      file: file,
+      name: file.name,
+      order: fileOrderCounter,
+      status: 'pending',
+      extracted: null,
+      errorMsg: null
+    };
+    fileRegistry.push(record);
+    ocrQueue.push(record.id);
+  });
+
+  e.target.value = ''; // reset input so same file can be re-added
+  renderFileList();
+  // NO auto-analysis. OCR only, and user must click Begin Analysis manually.
+  processOCRQueue();
+}
+
+// Serial OCR queue — ONE file at a time with 3s spacing
+async function processOCRQueue() {
+  if (ocrQueueRunning) return;  // guard re-entrancy
+  ocrQueueRunning = true;
+
+  while (true) {
+    // Find next pending record (in FIFO order, respecting ocrQueue)
+    let nextId = null;
+    for (const id of ocrQueue) {
+      const rec = fileRegistry.find(r => r.id === id);
+      if (rec && rec.status === 'pending') { nextId = id; break; }
+    }
+    if (!nextId) break;
+
+    // Remove from queue
+    ocrQueue = ocrQueue.filter(id => id !== nextId);
+    const record = fileRegistry.find(r => r.id === nextId);
+    if (!record) continue;
+
+    // Mark processing
+    record.status = 'processing';
+    renderFileList();
+    updateOCRStatusBar();
+
+    // Run single OCR attempt (MAX_ATTEMPTS = 1, no automatic retry)
+    const success = await processFile(record);
+    record.status = success ? 'done' : 'error';
+    renderFileList();
+    rebuildTextarea();
+    updateOCRStatusBar();
+
+    // 3-second spacing between OCR calls
+    if (ocrQueue.some(id => fileRegistry.find(r => r.id === id && r.status === 'pending'))) {
+      await sleep(3000);
+    }
+  }
+
+  ocrQueueRunning = false;
+  updateOCRStatusBar();
+}
+
+// Single OCR pass — MAX_ATTEMPTS = 1, no retries
+// All AI calls go to backend /api/analyze
+async function processFile(record) {
+  try {
+    const base64 = await fileToBase64(record.file);
+    const mediaType = record.file.type || 'image/jpeg';
+    const isImage = mediaType.startsWith('image/');
+    const isPdf = mediaType === 'application/pdf';
+
+    if (!isImage && !isPdf) {
+      record.errorMsg = 'Unsupported file type';
+      return false;
+    }
+
+    // Build payload for backend
+    const imagePayload = {
+      type: isPdf ? 'document' : 'image',
+      mediaType: mediaType,
+      data: base64
+    };
+
+    let response;
+    try {
+      response = await fetch(API_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          mode: 'ocr',
+          images: [imagePayload]
+        })
+      });
+    } catch (networkErr) {
+      record.errorMsg = 'Backend API required for live AI processing.';
+      showError('Backend API required for live AI processing. Start the /api/analyze server.');
+      return false;
+    }
+
+    if (!response.ok) {
+      if (response.status === 429) {
+        record.errorMsg = 'Rate limit reached. Wait 30 seconds and try again.';
+        showError('Rate limit reached. Wait 30 seconds and try again.');
+        return false;
+      }
+      if (response.status === 404 || response.status === 0) {
+        record.errorMsg = 'Backend API required for live AI processing.';
+        showError('Backend API required for live AI processing.');
+        return false;
+      }
+      record.errorMsg = 'Server error: ' + response.status;
+      showError('Server error ' + response.status + '. Check the backend console.');
+      return false;
+    }
+
+    const data = await response.json();
+    const extracted = (data.text || '').trim();
+
+    if (!extracted || extracted === 'NO_TEXT_FOUND') {
+      record.errorMsg = 'No readable text found in this image.';
+      return false;
+    }
+
+    record.extracted = extracted;
+    return true;
+
+  } catch (err) {
+    record.errorMsg = err.message || 'Unknown error';
+    return false;
+  }
+}
+
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result.split(',')[1]);
+    reader.onerror = () => reject(new Error('File read failed'));
+    reader.readAsDataURL(file);
+  });
+}
+
+function updateOCRStatusBar() {
+  const bar = document.getElementById('ocr-status-bar');
+  const label = document.getElementById('ocr-status-text');
+  const processing = fileRegistry.filter(r => r.status === 'processing' || r.status === 'pending');
+  const currentlyProcessing = fileRegistry.find(r => r.status === 'processing');
+
+  if (currentlyProcessing || ocrQueueRunning) {
+    const total = fileRegistry.length;
+    const doneCount = fileRegistry.filter(r => r.status === 'done' || r.status === 'error').length;
+    const current = currentlyProcessing ? currentlyProcessing.order : '?';
+    bar.classList.add('show');
+    label.textContent = `Reading screenshot ${current} of ${total}…`;
+  } else {
+    bar.classList.remove('show');
+  }
+}
+
+function renderFileList() {
+  const list = document.getElementById('file-list');
+  list.innerHTML = '';
+
+  fileRegistry.forEach((record) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'file-item-wrap';
+
+    const statusLabels = {
+      pending: 'Queued',
+      processing: 'Reading…',
+      done: 'Ready',
+      error: 'Failed'
+    };
+
+    const item = document.createElement('div');
+    item.className = 'file-item ' + record.status;
+    item.id = record.id;
+
+    // Build inner HTML — OCR text is shown/editable via toggle
+    let innerHtml = `
+      <div class="fi-icon"></div>
+      <div class="fi-order">${String(record.order).padStart(2,'0')}</div>
+      <div class="fi-name">${escapeHtml(record.name)}</div>
+      <div class="fi-status">${statusLabels[record.status] || record.status}</div>
+    `;
+
+    if (record.status === 'done') {
+      innerHtml += `<button class="fi-text-toggle" onclick="toggleFileText('${record.id}')">Edit text</button>`;
+    }
+    if (record.status === 'error') {
+      innerHtml += `<button class="fi-retry" onclick="retryFile('${record.id}')">Retry</button>`;
+    }
+    innerHtml += `<button class="fi-remove" onclick="removeFile('${record.id}')">×</button>`;
+
+    item.innerHTML = innerHtml;
+
+    // If done, append editable textarea for OCR text
+    if (record.status === 'done' && record.extracted) {
+      const editor = document.createElement('textarea');
+      editor.className = 'fi-text-editor';
+      editor.id = 'editor-' + record.id;
+      editor.value = record.extracted;
+      editor.rows = 5;
+      editor.placeholder = 'Extracted text (editable)';
+      editor.addEventListener('input', () => {
+        record.extracted = editor.value;
+        rebuildTextarea();
+      });
+      wrap.appendChild(item);
+      wrap.appendChild(editor);
+    } else {
+      wrap.appendChild(item);
+    }
+
+    list.appendChild(wrap);
+  });
+
+  // Batch controls
+  const controls = document.getElementById('batch-controls');
+  if (fileRegistry.length === 0) {
+    controls.style.display = 'none';
+    return;
+  }
+  controls.style.display = 'flex';
+  const done = fileRegistry.filter(r => r.status === 'done').length;
+  const failed = fileRegistry.filter(r => r.status === 'error').length;
+  const pending = fileRegistry.filter(r => r.status === 'pending' || r.status === 'processing').length;
+  let info = `${fileRegistry.length} file${fileRegistry.length === 1 ? '' : 's'}`;
+  if (pending > 0) info += ` · ${pending} processing`;
+  if (done > 0) info += ` · ${done} ready`;
+  if (failed > 0) info += ` · ${failed} failed`;
+  document.getElementById('batch-info').textContent = info;
+  document.getElementById('retry-failed-btn').style.display = failed > 0 ? 'inline-block' : 'none';
+}
+
+function toggleFileText(fileId) {
+  const editor = document.getElementById('editor-' + fileId);
+  if (!editor) return;
+  editor.classList.toggle('visible');
+  if (editor.classList.contains('visible')) {
+    editor.focus();
+  }
+}
+
+// Rebuild the main textarea from extracted OCR text — preserves manual text
+function rebuildTextarea() {
+  const textarea = document.getElementById('conversation-input');
+  const current = textarea.value;
+  const markerIdx = current.indexOf('[From file:');
+  const missingIdx = current.indexOf('[Missing —');
+  const candidates = [markerIdx, missingIdx].filter(i => i >= 0);
+  const earliestIdx = candidates.length > 0 ? Math.min(...candidates) : -1;
+  const manualText = earliestIdx >= 0 ? current.substring(0, earliestIdx).trim() : current.trim();
+
+  const ordered = [...fileRegistry].sort((a, b) => a.order - b.order);
+  let combined = manualText;
+  ordered.forEach(record => {
+    if (record.status === 'done' && record.extracted) {
+      if (combined) combined += '\n\n';
+      combined += `[From file: ${record.name}]\n${record.extracted}`;
+    } else if (record.status === 'error') {
+      if (combined) combined += '\n\n';
+      combined += `[Missing — file ${String(record.order).padStart(2,'0')}: ${record.name} failed to read]`;
+    }
+  });
+
+  textarea.value = combined;
+  checkInput();
+}
+
+function removeFile(fileId) {
+  fileRegistry = fileRegistry.filter(r => r.id !== fileId);
+  ocrQueue = ocrQueue.filter(id => id !== fileId);
+  renderFileList();
+  rebuildTextarea();
+}
+
+// Retry — re-queues the file (single attempt, serial queue)
+function retryFile(fileId) {
+  const record = fileRegistry.find(r => r.id === fileId);
+  if (!record) return;
+  record.status = 'pending';
+  record.extracted = null;
+  record.errorMsg = null;
+  ocrQueue.push(fileId);
+  renderFileList();
+  rebuildTextarea();
+  processOCRQueue();
+}
+
+function retryAllFailed() {
+  fileRegistry.forEach(record => {
+    if (record.status === 'error') {
+      record.status = 'pending';
+      record.extracted = null;
+      record.errorMsg = null;
+      ocrQueue.push(record.id);
+    }
+  });
+  renderFileList();
+  rebuildTextarea();
+  processOCRQueue();
+}
+
+function clearAllFiles() {
+  fileRegistry = [];
+  fileOrderCounter = 0;
+  ocrQueue = [];
+  renderFileList();
+  updateOCRStatusBar();
+  const textarea = document.getElementById('conversation-input');
+  const current = textarea.value;
+  const markerIdx = current.indexOf('[From file:');
+  const missingIdx = current.indexOf('[Missing —');
+  const candidates = [markerIdx, missingIdx].filter(i => i >= 0);
+  if (candidates.length > 0) {
+    textarea.value = current.substring(0, Math.min(...candidates)).trim();
+  }
+  checkInput();
+}
+
+// ═══════════════════════════════════════════════════════
+// ANALYSIS ENGINE — Single analysisLock prevents double runs
+// ═══════════════════════════════════════════════════════
+async function startAnalysis() {
+  // analysisLock: hard prevent duplicate execution
+  if (analysisLock) return;
+
+  const text = document.getElementById('conversation-input').value.trim();
+  const optCtx = document.getElementById('optional-context').value.trim();
+  if (!text || text.length < 20) return;
+
+  // Block if OCR still running
+  const stillProcessing = fileRegistry.filter(r => r.status === 'pending' || r.status === 'processing');
+  if (stillProcessing.length > 0) {
+    showError(`${stillProcessing.length} screenshot(s) are still being read. Wait for them to finish before analyzing.`);
+    return;
+  }
+
+  // Lock
+  analysisLock = true;
+  clearError();
+  document.getElementById('analyze-btn').disabled = true;
+
+  // Switch to analysis screen
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('analysis-screen').classList.add('active');
+
+  // Reset agent rows
+  document.querySelectorAll('.agent-row').forEach(r => {
+    r.classList.remove('active', 'done');
+    r.querySelector('.agent-status').textContent = 'Waiting';
+  });
+
+  try {
+    await runSequentialAnalysis(text, optCtx);
+  } catch (err) {
+    analysisLock = false;
+    let userMsg = 'Something went wrong during analysis.';
+    if (err.message && err.message.includes('rate limit')) {
+      userMsg = 'Rate limit reached. Wait 30 seconds and try again.';
+    } else if (err.message && err.message.includes('backend')) {
+      userMsg = 'Backend API required for live AI processing.';
+    } else if (err.message === 'TIMEOUT') {
+      userMsg = 'Analysis timed out. Try with a shorter conversation.';
+    }
+    showError(userMsg);
+    showInput();
+  }
+}
+
+// Sequential (not parallel) agent pipeline — eliminates 8-agent fanout 429 storms
+async function runSequentialAnalysis(text, optCtx) {
+  const agentNames = ['tone','subtext','manipulation','style','conflict','attachment','power','pattern'];
+  const agentRows = document.querySelectorAll('.agent-row');
+  const phaseLabel = document.getElementById('analysis-phase-label');
+
+  const agentOutputs = {};
+
+  phaseLabel.textContent = 'Phase 1 of 2 · Running analytical lenses';
+
+  // Run each agent ONE AT A TIME in sequence
+  for (let i = 0; i < agentNames.length; i++) {
+    const name = agentNames[i];
+    const row = agentRows[i];
+
+    // Activate this agent row
+    row.classList.add('active');
+    row.querySelector('.agent-status').textContent = 'Reading…';
+
+    await sleep(200); // brief UI flash
+
+    // Call backend for this single agent
+    const result = await callBackendAgent(name, text, optCtx, currentContext);
+    agentOutputs[name] = result;
+
+    row.classList.remove('active');
+    row.classList.add('done');
+    row.querySelector('.agent-status').textContent = 'Complete';
+
+    // 1.2s spacing between agent calls (prevents 429 at rate-limited endpoints)
+    if (i < agentNames.length - 1) await sleep(1200);
+  }
+
+  // Synthesizer
+  phaseLabel.textContent = 'Phase 2 of 2 · Synthesizing';
+  const synthRow = agentRows[agentRows.length - 1];
+  synthRow.classList.add('active');
+  synthRow.querySelector('.agent-status').textContent = 'Synthesizing…';
+
+  const synthesis = await callBackendSynthesizer(text, optCtx, currentContext, agentOutputs);
+
+  synthRow.classList.remove('active');
+  synthRow.classList.add('done');
+  synthRow.querySelector('.agent-status').textContent = 'Complete';
+
+  analysisResults = { agentOutputs, synthesis, context: currentContext, text, optCtx };
+
+  await sleep(600);
+  renderResults(analysisResults);
+  showResults();
+
+  // Release lock only after success
+  analysisLock = false;
+}
+
+// ── Backend call: single agent ──
+async function callBackendAgent(agentName, text, optCtx, context) {
+  let response;
+  try {
+    response = await fetch(API_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        mode: 'analysis',
+        subMode: 'agent',
+        agentName,
+        transcript: text,
+        context: optCtx || '',
+        contextType: context
+      })
+    });
+  } catch (netErr) {
+    throw new Error('Backend API required for live AI processing.');
+  }
+
+  if (!response.ok) {
+    if (response.status === 429) throw new Error('rate limit');
+    if (response.status === 404) throw new Error('Backend API required for live AI processing.');
+    throw new Error('Server error ' + response.status);
+  }
+
+  const data = await response.json();
+  return data.result || { summary: 'No output from this lens.', confidence: 'Low', error: true };
+}
+
+// ── Backend call: synthesizer ──
+async function callBackendSynthesizer(text, optCtx, context, agentOutputs) {
+  let response;
+  try {
+    response = await fetch(API_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        mode: 'analysis',
+        subMode: 'synthesize',
+        transcript: text,
+        context: optCtx || '',
+        contextType: context,
+        agentOutputs
+      })
+    });
+  } catch (netErr) {
+    throw new Error('Backend API required for live AI processing.');
+  }
+
+  if (!response.ok) {
+    if (response.status === 429) throw new Error('rate limit');
+    if (response.status === 404) throw new Error('Backend API required for live AI processing.');
+    throw new Error('Server error ' + response.status);
+  }
+
+  const data = await response.json();
+  return data.result || buildFallbackReport(null, 'Synthesizer returned no data');
+}
+
+
+function renderMarkdownReport(markdown) {
+  return markdownToHtml(markdown || '');
+}
+
+function markdownToHtml(markdown) {
+  const lines = (markdown || '').replace(/\r\n/g, '\n').split('\n');
+  let html = '';
+  let paragraph = [];
+  let listType = null;
+  let listItems = [];
+
+  function flushParagraph() {
+    if (!paragraph.length) return;
+    html += '<p>' + inlineMarkdown(paragraph.join(' ')) + '</p>';
+    paragraph = [];
+  }
+
+  function flushList() {
+    if (!listType) return;
+    html += '<' + listType + '>' + listItems.map(item => '<li>' + inlineMarkdown(item) + '</li>').join('') + '</' + listType + '>';
+    listType = null;
+    listItems = [];
+  }
+
+  function isTableStart(i) {
+    return lines[i] && lines[i].trim().startsWith('|') &&
+      lines[i + 1] && /^\s*\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)+\|?\s*$/.test(lines[i + 1]);
+  }
+
+  function renderTable(start) {
+    const rows = [];
+    let i = start;
+    while (i < lines.length && lines[i].trim().startsWith('|')) {
+      rows.push(lines[i].trim());
+      i++;
+    }
+    const cells = row => row.replace(/^\|/, '').replace(/\|$/, '').split('|').map(cell => cell.trim());
+    const header = cells(rows[0]);
+    const bodyRows = rows.slice(2).map(cells);
+    let table = '<table><thead><tr>' + header.map(cell => '<th>' + inlineMarkdown(cell) + '</th>').join('') + '</tr></thead><tbody>';
+    bodyRows.forEach(row => {
+      table += '<tr>' + row.map(cell => '<td>' + inlineMarkdown(cell) + '</td>').join('') + '</tr>';
+    });
+    table += '</tbody></table>';
+    return { table, next: i };
+  }
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const trimmed = line.trim();
+
+    if (!trimmed) {
+      flushParagraph();
+      flushList();
+      continue;
+    }
+
+    if (isTableStart(i)) {
+      flushParagraph();
+      flushList();
+      const rendered = renderTable(i);
+      html += rendered.table;
+      i = rendered.next - 1;
+      continue;
+    }
+
+    if (/^---+$/.test(trimmed)) {
+      flushParagraph();
+      flushList();
+      html += '<hr>';
+      continue;
+    }
+
+    const heading = trimmed.match(/^(#{2,4})\s+(.+)$/);
+    if (heading) {
+      flushParagraph();
+      flushList();
+      const level = heading[1].length;
+      html += '<h' + level + '>' + inlineMarkdown(heading[2]) + '</h' + level + '>';
+      continue;
+    }
+
+    if (trimmed.startsWith('>')) {
+      flushParagraph();
+      flushList();
+      html += '<blockquote>' + inlineMarkdown(trimmed.replace(/^>\s?/, '')) + '</blockquote>';
+      continue;
+    }
+
+    const unordered = trimmed.match(/^[-*]\s+(.+)$/);
+    const ordered = trimmed.match(/^\d+\.\s+(.+)$/);
+    if (unordered || ordered) {
+      flushParagraph();
+      const nextType = unordered ? 'ul' : 'ol';
+      if (listType && listType !== nextType) flushList();
+      listType = nextType;
+      listItems.push((unordered || ordered)[1]);
+      continue;
+    }
+
+    paragraph.push(trimmed);
+  }
+
+  flushParagraph();
+  flushList();
+  return html;
+}
+
+function inlineMarkdown(text) {
+  return escapeHtml(text)
+    .replace(/\`([^\`]+)\`/g, '<code>$1</code>')
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*([^*]+)\*/g, '<em>$1</em>');
+}
+
+// ═══════════════════════════════════════════════════════
+// RENDER RESULTS — Premium report structure
+// ═══════════════════════════════════════════════════════
+function renderResults(data) {
+  const { synthesis, agentOutputs, context } = data;
+  const body = document.getElementById('results-body');
+  const contextLabels = {
+    relationship: 'Personal relationship',
+    workplace: 'Workplace communication',
+    family: 'Family dynamics',
+    negotiation: 'Negotiation / Professional',
+    legal: 'Legal / Financial',
+    other: 'General communication'
+  };
+
+  if (synthesis && synthesis.reportMarkdown) {
+    const reportHtml = renderMarkdownReport(synthesis.reportMarkdown);
+    let html = `
+      <div class="results-meta">
+        <div class="results-type">${contextLabels[context] || 'Communication analysis'}</div>
+        <div class="results-date">${new Date().toLocaleDateString('en-US', {month:'long',day:'numeric',year:'numeric'})}</div>
+      </div>
+      <div class="report-section">
+        <div class="section-number">Decode</div>
+        <div class="markdown-report">${reportHtml}</div>
+      </div>`;
+
+    html += `<div class="refine-section">
+      <div class="refine-header">
+        <div class="refine-icon">+</div>
+        <div class="refine-title">Add what wasn't said.</div>
+      </div>
+      <div class="refine-sub">
+        Context that did not make it into your initial input can dramatically change the reading. Add it here and the decode will refine itself.
+      </div>
+      <textarea class="refine-input" id="refine-input" placeholder="Examples: 'They're my ex of 3 years.' · 'This happened after I told them I'm dating someone new.' · 'They have access to my insurance.' · 'I have documentation contradicting their claim.'"></textarea>
+      <div class="refine-actions">
+        <button class="refine-btn" id="refine-btn" onclick="refineAnalysis()">Refine the decode →</button>
+        <span class="refine-note">Re-runs synthesis with new context · ~30 seconds</span>
+        <span class="refine-status" id="refine-status"><span class="refine-status-dot"></span>Refining…</span>
+      </div>
+    </div>`;
+
+    const agentMeta = {
+      tone:'Tone Analyst', subtext:'Emotional Subtext', manipulation:'Signal Detection',
+      style:'Communication Style', conflict:'Conflict Dynamics', attachment:'Relational Patterns',
+      power:'Power Dynamics', pattern:'Pattern Recognition'
+    };
+    html += `<div class="report-section">
+      <div class="section-number">Appendix · Analytical Lenses</div>
+      <div class="sec-header"><div class="sec-title">The eight lenses.</div></div>
+      <button class="agents-toggle" id="agents-toggle" onclick="toggleAgents()">
+        <span class="agents-toggle-icon">›</span>
+        View individual agent outputs
+      </button>
+      <div class="agents-detail" id="agents-detail">`;
+    Object.entries(agentMeta).forEach(([key, label]) => {
+      const output = agentOutputs ? agentOutputs[key] : null;
+      if (!output) return;
+      const summary = output.summary || JSON.stringify(output).substring(0,200);
+      const c = (output.confidence||'low').toLowerCase();
+      html += `<div class="agent-card">
+        <div class="ac-header">
+          <div class="ac-name">${label}</div>
+          <div class="confidence-pill ${c==='high'?'high':c==='medium'?'medium':'low'}">${output.confidence||'Low'}</div>
+        </div>
+        <div class="ac-body">${escapeHtml(summary)}</div>
+      </div>`;
+    });
+    html += '</div></div>';
+    body.innerHTML = html;
+    return;
+  }
+
+  const isEmpty = !synthesis || !synthesis.overallReading ||
+    (!synthesis.emotionalSummary && !synthesis.senderEmotions?.length &&
+     !synthesis.translation && !synthesis.manipulationTactics?.length);
+
+  if (isEmpty) {
+    body.innerHTML = `
+      <div class="results-meta">
+        <div class="results-type">${contextLabels[context] || 'Communication analysis'}</div>
+        <div class="results-date">${new Date().toLocaleDateString('en-US', {month:'long',day:'numeric',year:'numeric'})}</div>
+      </div>
+      <div class="report-section">
+        <div class="section-number">Analysis Incomplete</div>
+        <div class="sec-header">
+          <div class="sec-title">The synthesis didn't complete.</div>
+          <div class="risk-pill moderate">Retry needed</div>
+        </div>
+        <div class="sec-body">
+          <p>The individual lenses ran, but the final synthesis returned empty data.</p>
+          <ul style="margin:16px 0 16px 24px;color:var(--cream-d);line-height:1.8;">
+            <li>The conversation may be very long — try a shorter excerpt</li>
+            <li>The API may have timed out — click New analysis to retry</li>
+            <li>The backend may have returned unparseable JSON</li>
+          </ul>
+        </div>
+      </div>`;
+    const agentMeta2 = {
+      tone:'Tone Analyst', subtext:'Emotional Subtext', manipulation:'Signal Detection',
+      style:'Communication Style', conflict:'Conflict Dynamics', attachment:'Relational Patterns',
+      power:'Power Dynamics', pattern:'Pattern Recognition'
+    };
+    let agentHtml = '<div class="agents-detail open">';
+    Object.entries(agentMeta2).forEach(([key, label]) => {
+      const output = agentOutputs ? agentOutputs[key] : null;
+      if (!output) return;
+      const summary = output.summary || JSON.stringify(output).substring(0,300);
+      const c = (output.confidence || 'low').toLowerCase();
+      agentHtml += `<div class="agent-card"><div class="ac-header"><div class="ac-name">${label}</div><div class="confidence-pill ${c}">${output.confidence||'Low'}</div></div><div class="ac-body">${summary}</div></div>`;
+    });
+    agentHtml += '</div>';
+    body.innerHTML += agentHtml;
+    return;
+  }
+
+  const risk = (synthesis.riskLevel || 'moderate').toLowerCase();
+  let secNum = 0;
+  const num = () => String(++secNum).padStart(2,'0');
+  let html = `
+    <div class="results-meta">
+      <div class="results-type">${contextLabels[context] || 'Communication analysis'}</div>
+      <div class="results-date">${new Date().toLocaleDateString('en-US', {month:'long',day:'numeric',year:'numeric'})}</div>
+    </div>`;
+
+  // ─── 1. OVERALL READING ───
+  html += `<div class="report-section">
+    <div class="section-number">Section ${num()} · Overview</div>
+    <div class="sec-header">
+      <div class="sec-title">What may be happening here.</div>
+      <div class="risk-pill ${risk}">${synthesis.riskLevel || 'Moderate'} risk</div>
+    </div>
+    <div class="sec-body"><p>${synthesis.overallReading || 'Analysis unavailable.'}</p></div>
+  </div>`;
+
+  // ─── 2. EMOTIONAL SUMMARY ───
+  if (synthesis.emotionalSummary) {
+    html += `<div class="report-section">
+      <div class="section-number">Section ${num()} · Emotional Landscape</div>
+      <div class="sec-header"><div class="sec-title">The emotional summary.</div></div>
+      <div class="sec-body">${synthesis.emotionalSummary.split('\n\n').map(p=>`<p>${p}</p>`).join('')}</div>
+    </div>`;
+  }
+
+  // ─── 3. SENDER EMOTIONS TABLE ───
+  if (synthesis.senderEmotions && synthesis.senderEmotions.length) {
+    html += `<div class="report-section">
+      <div class="section-number">Section ${num()} · Emotional Subtext</div>
+      <div class="sec-header"><div class="sec-title">What may be present beneath the words.</div></div>
+      <div class="sec-body">
+        <p>These are emotions that may be active beneath the surface. Intensity is a calibrated guess, not a measurement.</p>
+        <table class="data-table">
+          <thead><tr><th>Emotion</th><th>Intensity</th><th>Evidence</th></tr></thead>
+          <tbody>`;
+    synthesis.senderEmotions.forEach(e => {
+      const intensity = (e.intensity||'medium').toLowerCase();
+      html += `<tr><td><strong>${e.emotion||''}</strong></td><td><span class="intensity-badge ${intensity}">${e.intensity||'Medium'}</span></td><td>${e.evidence||''}</td></tr>`;
+    });
+    html += `</tbody></table></div></div>`;
+  }
+
+  // ─── 4. WHAT THEY AREN'T SAYING ───
+  if (synthesis.whatTheyArentSaying && synthesis.whatTheyArentSaying.length) {
+    html += `<div class="report-section">
+      <div class="section-number">Section ${num()} · The Unsaid</div>
+      <div class="sec-header"><div class="sec-title">What they may not be saying.</div></div>
+      <div class="sec-body">
+        <p>If the sender were being more direct, these are statements the analysis suggests may be closer to the underlying truth. These are hypotheses, not facts.</p>
+        <div class="unspoken-list">`;
+    synthesis.whatTheyArentSaying.forEach(s => {
+      html += `<div class="unspoken-item">${s}</div>`;
+    });
+    html += `</div></div></div>`;
+  }
+
+  // ─── 5. TRANSLATION (LAYERED) ───
+  if (synthesis.translation) {
+    html += `<div class="report-section">
+      <div class="section-number">Section ${num()} · Translation</div>
+      <div class="sec-header"><div class="sec-title">What was said, and what it may mean.</div></div>
+      <div class="sec-body">
+        <p>A layered reading — from surface meaning to deepest possible intent. Each layer represents a more interpretive reading, with correspondingly lower certainty.</p>
+        <div class="translation-card">
+          <div class="translation-layer surface">
+            <div class="tl-label">Surface · What they said</div>
+            <div class="tl-body">${synthesis.translation.surface||''}</div>
+          </div>
+          <div class="translation-layer">
+            <div class="tl-label">Layer 1 · What they want you to feel</div>
+            <div class="tl-body">${synthesis.translation.layer1||''}</div>
+          </div>
+          <div class="translation-layer">
+            <div class="tl-label">Layer 2 · What they may be experiencing</div>
+            <div class="tl-body">${synthesis.translation.layer2||''}</div>
+          </div>
+          <div class="translation-layer deepest">
+            <div class="tl-label">Layer 3 · The possible underlying goal</div>
+            <div class="tl-body">${synthesis.translation.layer3||''}</div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  // ─── 6. MANIPULATION TACTICS ───
+  if (synthesis.manipulationTactics && synthesis.manipulationTactics.length) {
+    html += `<div class="report-section">
+      <div class="section-number">Section ${num()} · Pattern Detection</div>
+      <div class="sec-header"><div class="sec-title">Patterns worth naming.</div></div>
+      <div class="sec-body">
+        <p>Communication patterns that may indicate influence or coercion dynamics. Each pattern includes evidence and a non-manipulative alternative reading where applicable.</p>
+        <table class="data-table">
+          <thead><tr><th>Pattern</th><th>Severity</th><th>Evidence</th><th>Alternative reading</th></tr></thead>
+          <tbody>`;
+    synthesis.manipulationTactics.forEach(t => {
+      const sev = (t.severity||'medium').toLowerCase();
+      html += `<tr><td><strong>${t.tactic||''}</strong></td><td><span class="intensity-badge ${sev}">${t.severity||'Medium'}</span></td><td>${t.evidence||''}</td><td><em>${t.alternativeExplanation||'—'}</em></td></tr>`;
+    });
+    html += `</tbody></table></div></div>`;
+  }
+
+  // ─── 7. WHAT THEY REALLY WANT ───
+  if (synthesis.whatTheyReallyWant && synthesis.whatTheyReallyWant.length) {
+    html += `<div class="report-section">
+      <div class="section-number">Section ${num()} · Likely Motivations</div>
+      <div class="sec-header"><div class="sec-title">What they may actually want, ranked.</div></div>
+      <div class="sec-body">
+        <p>The analysis ranks what the sender's actual goals may be, ordered by likelihood based on tone, framing, and timing.</p>
+        <div class="ranked-list">`;
+    synthesis.whatTheyReallyWant.forEach((w, i) => {
+      html += `<div class="ranked-item">
+        <div class="ranked-num">${String(w.rank||i+1).padStart(2,'0')}</div>
+        <div class="ranked-body">
+          <div class="ranked-want">${w.want||''}</div>
+          <div class="ranked-reason">${w.reasoning||''}</div>
+        </div>
+      </div>`;
+    });
+    html += `</div></div></div>`;
+  }
+
+  // ─── 8. POWER DYNAMICS ───
+  if (synthesis.powerDynamics && synthesis.powerDynamics.length) {
+    html += `<div class="report-section">
+      <div class="section-number">Section ${num()} · Power Distribution</div>
+      <div class="sec-header"><div class="sec-title">Where the leverage sits.</div></div>
+      <div class="sec-body">
+        <p>Each lever of power in this exchange, who appears to hold it, and how strong it is.</p>
+        <table class="data-table">
+          <thead><tr><th>Lever</th><th>Held by</th><th>Strength</th><th>Notes</th></tr></thead>
+          <tbody>`;
+    synthesis.powerDynamics.forEach(p => {
+      const s = (p.strength||'medium').toLowerCase();
+      html += `<tr><td><strong>${p.lever||''}</strong></td><td>${p.holder||''}</td><td><span class="intensity-badge ${s}">${p.strength||'Medium'}</span></td><td>${p.notes||''}</td></tr>`;
+    });
+    html += `</tbody></table></div></div>`;
+  }
+
+  // ─── 9. RESPONSE SCRIPTS ───
+  if (synthesis.responseScripts && synthesis.responseScripts.length) {
+    html += `<div class="report-section">
+      <div class="section-number">Section ${num()} · Response Options</div>
+      <div class="sec-header"><div class="sec-title">Word-for-word scripts.</div></div>
+      <div class="sec-body">
+        <p>These are concrete responses you could send, organized by what each one accomplishes. Choose based on the outcome you actually want — not on what feels right in the moment.</p>`;
+    // FIX: AI content is stored in scriptStore and referenced by index.
+    // No AI-generated text is ever placed inside an onclick="..." string.
+    scriptStore = {};
+    synthesis.responseScripts.forEach((s, i) => {
+      scriptStore[i] = s.script || '';
+      html += `<div class="script-card">
+        <div class="script-header">
+          <div class="script-scenario">${s.scenario||'Approach '+(i+1)}</div>
+          <button class="script-copy-btn" onclick="copyScript(this,${i})">Copy</button>
+        </div>
+        <div class="script-body">"${s.script||''}"</div>
+        <div class="script-effect">Effect · ${s.effect||''}</div>
+      </div>`;
+    });
+    html += `</div></div>`;
+  }
+
+  // ─── 10. PHRASES THAT WORK / AVOID ───
+  if ((synthesis.phrasesThatWork && synthesis.phrasesThatWork.length) ||
+      (synthesis.phrasesToAvoid && synthesis.phrasesToAvoid.length)) {
+    html += `<div class="report-section">
+      <div class="section-number">Section ${num()} · Language</div>
+      <div class="sec-header"><div class="sec-title">Phrases that work, phrases that backfire.</div></div>
+      <div class="sec-body">
+        <p>Specific language calibrated to this conversation's dynamics.</p>
+        <div class="phrase-grid">
+          <div class="phrase-col work">
+            <div class="phrase-col-header">✓ Phrases that work</div>
+            <div class="phrase-list">`;
+    (synthesis.phrasesThatWork||[]).forEach(p => { html += `<div class="phrase-item work">"${p}"</div>`; });
+    html += `</div></div><div class="phrase-col avoid">
+            <div class="phrase-col-header">✗ Phrases to avoid</div>
+            <div class="phrase-list">`;
+    (synthesis.phrasesToAvoid||[]).forEach(p => {
+      if (typeof p === 'string') {
+        html += `<div class="phrase-item avoid">"${p}"</div>`;
+      } else {
+        html += `<div class="phrase-item avoid">"${p.phrase||''}"<span class="phrase-why">${p.why||''}</span></div>`;
+      }
+    });
+    html += `</div></div></div></div></div>`;
+  }
+
+  // ─── 11. SCORECARD ───
+  if (synthesis.scorecard && synthesis.scorecard.length) {
+    html += `<div class="report-section">
+      <div class="section-number">Section ${num()} · Scorecard</div>
+      <div class="sec-header"><div class="sec-title">By the numbers.</div></div>
+      <div class="sec-body">
+        <p>Calibrated ratings across key dimensions. These are interpretive scores, not measurements.</p>
+        <div class="scorecard">`;
+    synthesis.scorecard.forEach(s => {
+      const score = parseInt(s.score)||5;
+      const width = Math.min(100, score*10);
+      html += `<div class="score-card">
+        <div class="score-dim">${s.dimension||''}</div>
+        <div class="score-value">${score}<span class="score-out">/ 10</span></div>
+        <div class="score-verdict">${s.verdict||''}</div>
+        <div class="score-bar" style="width:${width}%"></div>
+      </div>`;
+    });
+    html += `</div></div></div>`;
+  }
+
+  // ─── 12. OUTCOMES ───
+  if ((synthesis.ifYouComply && synthesis.ifYouComply.length) ||
+      (synthesis.ifYouStandFirm && synthesis.ifYouStandFirm.length)) {
+    html += `<div class="report-section">
+      <div class="section-number">Section ${num()} · Projected Outcomes</div>
+      <div class="sec-header"><div class="sec-title">Two paths forward.</div></div>
+      <div class="sec-body">
+        <p>The likely consequences of two different approaches. These are projections based on the patterns observed, not predictions.</p>
+        <div class="outcomes-grid">
+          <div class="outcomes-col comply">
+            <div class="outcomes-header">If you comply or accommodate</div>
+            <div class="outcomes-list">`;
+    (synthesis.ifYouComply||[]).forEach(o => { html += `<div class="outcome-row"><div class="outcome-mark">→</div><div>${o}</div></div>`; });
+    html += `</div></div><div class="outcomes-col firm">
+            <div class="outcomes-header">If you hold your ground</div>
+            <div class="outcomes-list">`;
+    (synthesis.ifYouStandFirm||[]).forEach(o => { html += `<div class="outcome-row"><div class="outcome-mark">→</div><div>${o}</div></div>`; });
+    html += `</div></div></div></div></div>`;
+  }
+
+  // ─── 13. WHAT THIS DOESN'T MEAN ───
+  if (synthesis.whatThisDoesntMean && synthesis.whatThisDoesntMean.length) {
+    html += `<div class="report-section">
+      <div class="section-number">Section ${num()} · Limits</div>
+      <div class="sec-header"><div class="sec-title">What this does not mean.</div></div>
+      <div class="sec-body">
+        <p>Equally important as what may be happening: what this conversation does not reliably indicate.</p>`;
+    synthesis.whatThisDoesntMean.forEach(item => {
+      html += `<div class="signal-callout neutral"><div class="signal-label">Not supported</div>${item}</div>`;
+    });
+    html += `</div></div>`;
+  }
+
+  // ─── 14. UNCERTAINTIES ───
+  if (synthesis.uncertainties && synthesis.uncertainties.length) {
+    html += `<div class="report-section">
+      <div class="section-number">Section ${num()} · Uncertainty</div>
+      <div class="sec-header"><div class="sec-title">What we cannot know.</div></div>
+      <div class="sec-body">
+        <p>This is not a disclaimer — it's an honest account of what no analysis can determine from text alone.</p>`;
+    synthesis.uncertainties.forEach(u => {
+      html += `<div class="signal-callout"><div class="signal-label">Genuine uncertainty</div>${u}</div>`;
+    });
+    html += `</div></div>`;
+  }
+
+  // ─── 15. BOTTOM LINE ───
+  if (synthesis.bottomLine) {
+    html += `<div class="bottom-line">
+      <div class="bottom-line-label">Bottom line</div>
+      <div class="bottom-line-text">${synthesis.bottomLine}</div>
+    </div>`;
+  }
+
+  // ─── REFINEMENT SECTION ───
+  html += `<div class="refine-section">
+    <div class="refine-header">
+      <div class="refine-icon">+</div>
+      <div class="refine-title">Add what wasn't said.</div>
+    </div>
+    <div class="refine-sub">
+      Forget to mention something? Context that didn't make it into your initial input can dramatically change the reading. Add it here and the analysis will refine itself.
+    </div>
+    <textarea class="refine-input" id="refine-input" placeholder="Examples: 'They're my ex of 3 years.' · 'This happened after I told them I'm dating someone new.' · 'They have access to my insurance.' · 'I have a history of substance use they know about.' · 'I have documentation contradicting their claim.'"></textarea>
+    <div class="refine-suggestions">
+      <button class="refine-chip" onclick="addRefineChip('This is my ex.')">It's my ex</button>
+      <button class="refine-chip" onclick="addRefineChip('There\\'s a history of substance use they know about.')">Substance history</button>
+      <button class="refine-chip" onclick="addRefineChip('They have financial or insurance leverage over me.')">Financial leverage</button>
+      <button class="refine-chip" onclick="addRefineChip('I\\'m now dating someone new and they know.')">New relationship</button>
+      <button class="refine-chip" onclick="addRefineChip('This is part of a longer pattern of similar behavior.')">Pattern of behavior</button>
+      <button class="refine-chip" onclick="addRefineChip('There are children involved.')">Children involved</button>
+      <button class="refine-chip" onclick="addRefineChip('I have documentation that contradicts their claim.')">Documentation</button>
+      <button class="refine-chip" onclick="addRefineChip('There is a power imbalance (boss, family elder, etc).')">Power imbalance</button>
+    </div>
+    <div class="refine-actions">
+      <button class="refine-btn" id="refine-btn" onclick="refineAnalysis()">Refine the analysis →</button>
+      <span class="refine-note">Re-runs synthesis with new context · ~30 seconds</span>
+      <span class="refine-status" id="refine-status"><span class="refine-status-dot"></span>Refining…</span>
+    </div>
+  </div>`;
+
+  // ─── AGENT BREAKDOWN (APPENDIX) ───
+  html += `<div class="report-section">
+    <div class="section-number">Appendix · Analytical Lenses</div>
+    <div class="sec-header"><div class="sec-title">The eight lenses.</div></div>
+    <button class="agents-toggle" id="agents-toggle" onclick="toggleAgents()">
+      <span class="agents-toggle-icon">›</span>
+      View individual agent outputs
+    </button>
+    <div class="agents-detail" id="agents-detail">`;
+  const agentMeta = {
+    tone:'Tone Analyst', subtext:'Emotional Subtext', manipulation:'Signal Detection',
+    style:'Communication Style', conflict:'Conflict Dynamics', attachment:'Relational Patterns',
+    power:'Power Dynamics', pattern:'Pattern Recognition'
+  };
+  Object.entries(agentMeta).forEach(([key, label]) => {
+    const output = agentOutputs[key];
+    if (!output) return;
+    const summary = output.summary || JSON.stringify(output).substring(0,200);
+    const c = (output.confidence||'low').toLowerCase();
+    html += `<div class="agent-card">
+      <div class="ac-header">
+        <div class="ac-name">${label}</div>
+        <div class="confidence-pill ${c==='high'?'high':c==='medium'?'medium':'low'}">${output.confidence||'Low'}</div>
+      </div>
+      <div class="ac-body">${summary}</div>
+    </div>`;
+  });
+  html += `</div></div>`;
+
+  // ─── SHARE ───
+  // FIX: store insight in module-level variable; never inject AI content into onclick.
+  if (synthesis.shareableInsight) {
+    shareInsight = synthesis.shareableInsight;
+    html += `<div class="share-section">
+      <button class="share-btn" onclick="openShareCard()">
+        Create shareable insight card
+      </button>
+      <div class="share-note">Personal details not included · Pattern-only</div>
+    </div>`;
+  }
+
+  body.innerHTML = html;
+}
+
+// ═══════════════════════════════════════════════════════
+// FALLBACK REPORT (when synthesis fails)
+// ═══════════════════════════════════════════════════════
+function buildFallbackReport(agentOutputs, errorMsg) {
+  return {
+    overallReading: 'The synthesis step did not return a final report. The individual analytical lenses below completed successfully — review their findings to see what each lens observed in the conversation.',
+    overallConfidence: 'Medium',
+    riskLevel: 'Moderate',
+    emotionalSummary: 'A full emotional synthesis could not be generated. The individual agent observations contain partial readings of the emotional landscape.',
+    senderEmotions: [],
+    whatTheyArentSaying: [],
+    manipulationTactics: [],
+    translation: null,
+    whatTheyReallyWant: [],
+    powerDynamics: [],
+    responseScripts: [
+      { scenario: 'Retry', script: 'Click "New analysis" or "Refine analysis" to regenerate the synthesis.', effect: 'The failure was likely transient.' }
+    ],
+    phrasesThatWork: [],
+    phrasesToAvoid: [],
+    scorecard: [],
+    ifYouComply: [],
+    ifYouStandFirm: [],
+    whatThisDoesntMean: ['The individual lens analyses did complete — their findings are still meaningful.'],
+    uncertainties: ['Synthesis could not be generated.', 'Technical note: ' + (errorMsg||'unknown error')],
+    bottomLine: 'Synthesis failed. Review the individual lens outputs below for the partial analysis.',
+    shareableInsight: '',
+    _synthesisFallback: true
+  };
+}
+
+// ═══════════════════════════════════════════════════════
+// REFINE ANALYSIS — sequential, locked
+// ═══════════════════════════════════════════════════════
+function addRefineChip(text) {
+  const input = document.getElementById('refine-input');
+  if (input.value.trim()) {
+    input.value = input.value.trim() + ' ' + text;
+  } else {
+    input.value = text;
+  }
+  input.focus();
+}
+
+async function refineAnalysis() {
+  const newContext = document.getElementById('refine-input').value.trim();
+  if (!newContext) {
+    document.getElementById('refine-input').focus();
+    return;
+  }
+  const btn = document.getElementById('refine-btn');
+  const status = document.getElementById('refine-status');
+  if (btn.disabled) return; // prevent double-click
+
+  btn.disabled = true;
+  status.classList.add('show');
+
+  const mergedContext = analysisResults.optCtx
+    ? `${analysisResults.optCtx}\n\nADDITIONAL CONTEXT (added after first analysis): ${newContext}`
+    : `ADDITIONAL CONTEXT: ${newContext}`;
+
+  try {
+    const text = analysisResults.text;
+    const context = analysisResults.context;
+
+    const newAgentOutputs = {};
+    const agentNames = ['tone','subtext','manipulation','style','conflict','attachment','power','pattern'];
+
+    // Sequential — no Promise.all
+    for (const name of agentNames) {
+      newAgentOutputs[name] = await callBackendAgent(name, text, mergedContext, context);
+      await sleep(1200);
+    }
+
+    const newSynthesis = await callBackendSynthesizer(text, mergedContext, context, newAgentOutputs);
+
+    analysisResults = {
+      ...analysisResults,
+      agentOutputs: newAgentOutputs,
+      synthesis: newSynthesis,
+      optCtx: mergedContext
+    };
+
+    renderResults(analysisResults);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // FIX: re-enable the refine button and hide spinner on success.
+    // Previously only the catch path reset these, so one successful refinement
+    // permanently disabled the button for the session.
+    btn.disabled = false;
+    status.classList.remove('show');
+
+  } catch (err) {
+    let userMsg = 'Refinement failed. ';
+    if (err.message && err.message.includes('rate limit')) {
+      userMsg += 'Rate limit reached. Wait 30 seconds and try again.';
+    } else if (err.message && err.message.includes('backend')) {
+      userMsg += 'Backend API required for live AI processing.';
+    } else {
+      userMsg += 'Please try again.';
+    }
+    showError(userMsg);
+    btn.disabled = false;
+    status.classList.remove('show');
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// SCRIPT COPY
+// ═══════════════════════════════════════════════════════
+// FIX: scriptIndex is a numeric key into scriptStore — no AI text in function arg.
+function copyScript(btn, scriptIndex) {
+  const scriptText = scriptStore[scriptIndex] || '';
+  navigator.clipboard.writeText(scriptText).then(() => {
+    const orig = btn.textContent;
+    btn.textContent = '✓ Copied';
+    btn.style.color = 'var(--calm)';
+    btn.style.borderColor = 'var(--calm)';
+    setTimeout(() => { btn.textContent = orig; btn.style.color = ''; btn.style.borderColor = ''; }, 1800);
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// SHARE CARD
+// ═══════════════════════════════════════════════════════
+// FIX: reads from shareInsight module variable — no AI text passed as function argument.
+function openShareCard() {
+  document.getElementById('sc-quote-txt').textContent = shareInsight;
+  document.getElementById('share-card-overlay').classList.add('open');
+}
+function closeShareCard(e) {
+  if (e.target === document.getElementById('share-card-overlay')) {
+    document.getElementById('share-card-overlay').classList.remove('open');
+  }
+}
+function copyShareText() {
+  const txt = document.getElementById('sc-quote-txt').textContent;
+  const full = '"' + txt + '"\n\n— Subtext: See what\'s underneath. subtext.ai';
+  navigator.clipboard.writeText(full).then(() => {
+    const btn = document.querySelector('.sc-copy');
+    btn.textContent = '✓ Copied'; btn.style.background = '#7eb89a'; btn.style.color = '#0d0c0a';
+    setTimeout(() => { btn.textContent = 'Copy to clipboard'; btn.style.background = ''; btn.style.color = ''; }, 2000);
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// TOGGLES
+// ═══════════════════════════════════════════════════════
+function toggleAgents() {
+  const toggle = document.getElementById('agents-toggle');
+  const detail = document.getElementById('agents-detail');
+  toggle.classList.toggle('open');
+  detail.classList.toggle('open');
+}
+
+// ═══════════════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════════════
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function escapeStr(s) {
+  return (s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;').replace(/\n/g,' ');
+}
+
+function escapeHtml(s) {
+  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>

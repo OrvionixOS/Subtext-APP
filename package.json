@@ -1,0 +1,14 @@
+{
+  "name": "subtext-backend",
+  "version": "1.0.0",
+  "description": "SUBTEXT psychology analysis backend — handles all Anthropic API calls server-side",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "ANTHROPIC_API_KEY=YOUR_KEY_HERE node server.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "license": "UNLICENSED"
+}
